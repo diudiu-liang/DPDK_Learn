@@ -306,30 +306,31 @@ main(int argc, char **argv)
 	struct rte_eth_dev_info dev_info;
 	int ret;
 
-	/* EAL init */
+	/* 初始化 EAL 环境 */
 	ret = rte_eal_init(argc, argv);
 	if (ret < 0)
 		rte_exit(EXIT_FAILURE, "Invalid EAL parameters\n");
 	argc -= ret;
 	argv += ret;
-	if (rte_lcore_count() != 1) {
+	if (rte_lcore_count() != 1) {//本程序只需要一个线程处理，超过一个核被启动直接退出程序
 		rte_exit(EXIT_FAILURE, "This application does not accept more than one core. "
 		"Please adjust the \"-c COREMASK\" parameter accordingly.\n");
 	}
 
-	/* Application non-EAL arguments parse */
+	/* 解析应用程序启动参数 */
 	ret = parse_args(argc, argv);
 	if (ret < 0)
 		rte_exit(EXIT_FAILURE, "Invalid input arguments\n");
 
-	/* Buffer pool init */
+	/* 初始化 Buffer pool */
 	pool = rte_pktmbuf_pool_create("pool", NB_MBUF, MEMPOOL_CACHE_SIZE,
 		0, RTE_MBUF_DEFAULT_BUF_SIZE, rte_socket_id());
 	if (pool == NULL)
 		rte_exit(EXIT_FAILURE, "Buffer pool creation error\n");
 
-	/* NIC init */
+	/* 网卡初始化 */
 	conf = port_conf;
+	//获取接收端口设备信息，网卡的各种功能都可以通过这个结构体访问
 	rte_eth_dev_info_get(port_rx, &dev_info);
 	if (dev_info.tx_offload_capa & DEV_TX_OFFLOAD_MBUF_FAST_FREE)
 		conf.txmode.offloads |= DEV_TX_OFFLOAD_MBUF_FAST_FREE;
